@@ -1,0 +1,19 @@
+services:
+  llm_service:
+    build:
+      context: .
+      dockerfile: C:\Users\tahira\Documents\autonomous-llm-self-healing\services\llm_service\Dockerfile
+    container_name: self_healing_llm_service # → Sprint 2: main API container for local model inference
+    ports:
+      - "8000:8000" # → Sprint 1: local FastAPI endpoint exposed to developer machine
+    environment:
+      SERVICE_NAME: "llm_service" # → Sprint 2: service label used by logs, metrics, and traces
+      REDIS_URL: "redis://redis:6379/0" # → Sprint 3: queue/cache endpoint for LangGraph remediation jobs
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: self_healing_redis # → Sprint 3: event bus for remediation agent triggers
+    ports:
+      - "6379:6379" # → Sprint 3: local Redis debugging port

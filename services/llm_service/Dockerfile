@@ -1,6 +1,13 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
+
 WORKDIR /app
-COPY requiements.txt .
-RUN pip install -r requirements
-COPY . .
+
+COPY requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY services /app/services
+
+EXPOSE 8000
+
 CMD ["uvicorn", "services.llm_service.main:app", "--host", "0.0.0.0", "--port", "8000"]
