@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 IGNORED_NAMES = {
     ".venv",
     "__pycache__",

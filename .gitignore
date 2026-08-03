@@ -7,3 +7,6 @@ mlruns/
 *.db
 .DS_Store
 .ipynb_checkpoints/
+# → Sprint 1: local secrets must never be committed to Git
+.env
+.env.*

@@ -2,18 +2,47 @@ services:
   llm_service:
     build:
       context: .
-      dockerfile: C:\Users\tahira\Documents\autonomous-llm-self-healing\services\llm_service\Dockerfile
-    container_name: self_healing_llm_service # → Sprint 2: main API container for local model inference
+      dockerfile: services/llm_service/Dockerfile
+    container_name: self_healing_llm_service
     ports:
-      - "8000:8000" # → Sprint 1: local FastAPI endpoint exposed to developer machine
+      - "8000:8000"
     environment:
-      SERVICE_NAME: "llm_service" # → Sprint 2: service label used by logs, metrics, and traces
-      REDIS_URL: "redis://redis:6379/0" # → Sprint 3: queue/cache endpoint for LangGraph remediation jobs
+      SERVICE_NAME: "llm_service"
+      VAULT_TOKEN: "dev-root-token"
+      VAULT_SECRET_PATH: "self-healing/dev"
+      VAULT_MOUNT_POINT: "secret"
+      VAULT_ADDR: "http://vault:8200"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
 
   redis:
     image: redis:7-alpine
-    container_name: self_healing_redis # → Sprint 3: event bus for remediation agent triggers
+    container_name: self_healing_redis
     ports:
-      - "6379:6379" # → Sprint 3: local Redis debugging port
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  vault:
+    image: hashicorp/vault:1.17
+    container_name: self_healing_vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "dev-root-token"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_ADDR: "http://127.0.0.1:8200"
+      VAULT_TOKEN: "dev-root-token"
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 5s
+      timeout: 3s
+      retries: 12

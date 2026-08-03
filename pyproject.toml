@@ -1,0 +1,15 @@
+[tool.ruff]
+line-length = 500 # → Sprint 1: max line length enforced locally and in PR checks
+target-version = "py310" # → Sprint 1: matches the Python runtime used by our FastAPI service
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"] # → Sprint 1: checks style errors, broken imports, import order, and common bug patterns
+
+[tool.mypy]
+python_version = "3.10" # → Sprint 1: type-checks against the same Python version as the app runtime
+ignore_missing_imports = true # → Sprint 2: avoids third-party stub issues while services are still forming
+strict = false # → Sprint 1: gives useful type coverage without blocking early architecture work
+
+[tool.pytest.ini_options]
+testpaths = ["test"] # → Sprint 1: tells pytest where unit tests live
+pythonpath = ["."] # → Sprint 1: allows tests to import services.* from the project root

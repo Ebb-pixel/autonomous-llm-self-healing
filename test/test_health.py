@@ -1,11 +1,16 @@
-from services.api.app.main import app
 from fastapi.testclient import TestClient
 
-client=TestClient(app)
+from services.llm_service.main import app
 
-def test_health_check_returns_ok()->None:
-    response=client.get("/health")
+client = TestClient(app)  # → Sprint 1: local test client that calls FastAPI without starting Uvicorn
 
-    assert response.status_code==200
-    assert response.json()["status"]=="ok"
-    assert response.json()["services"]=="Self-Healing LLM API"
+
+def test_health_check_returns_healthy_status() -> None:
+    # We test the smallest production signal first because CI needs a cheap proof the API imports.
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "healthy",
+        "service": "llm_service",
+    }
