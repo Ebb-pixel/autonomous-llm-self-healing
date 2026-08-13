@@ -1,9 +1,15 @@
 from fastapi import FastAPI, HTTPException, status
 
+from services.llm_service.feature_flags import (
+    FeatureFlagError,
+    FeatureFlagManager,
+)
 from services.llm_service.secret_manager import SecretManager, SecretManagerError
 
 SERVICE_NAME = "llm_service"  # → Sprint 2: service identifier used in metrics, logs, and API responses
 SECRET_PROOF_KEY = "MISTRAL_API_KEY"  # → Sprint 2: model credential key retrieved from Vault
+FEATURE_FLAG_KEY = "enable-new-llm-agent"
+
 
 app = FastAPI(
     title="Self-Healing LLM Service",  # → Sprint 1: service title displayed in generated OpenAPI documentation
@@ -35,4 +41,24 @@ def secret_readiness() -> dict[str, str]:
     return {
         "status": "ready",  # → Sprint 1: confirms the required secret was loaded successfully
         "source": "vault",  # → Sprint 1: confirms centralized Vault is the configured source
+    }
+
+@app.get("/feature-status")
+def feature_status() -> dict[str, bool]:
+
+    try:
+        feature_flags = FeatureFlagManager()
+
+        enabled = feature_flags.is_enabled(
+            FEATURE_FLAG_KEY,
+            False,
+        )
+
+    except FeatureFlagError:
+        return {
+            "enabled": False,
+        }
+
+    return {
+        "enabled": enabled,
     }

@@ -12,6 +12,8 @@ services:
       VAULT_SECRET_PATH: "self-healing/dev"
       VAULT_MOUNT_POINT: "secret"
       VAULT_ADDR: "http://vault:8200"
+      LD_SDK_KEY: "" # → Sprint 1: LaunchDarkly server SDK key; production value injected securely
+      LD_ENVIRONMENT: "development" # →
     depends_on:
       redis:
         condition: service_healthy
